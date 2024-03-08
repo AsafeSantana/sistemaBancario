@@ -1,6 +1,6 @@
 package com.sistema.contasbancarias.model;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,11 +12,16 @@ import java.time.LocalDateTime;
 @Setter
 public class Transaction  {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private LocalDateTime data;
 
     private BigDecimal quantidade;
 
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
 
 }
