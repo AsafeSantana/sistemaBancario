@@ -49,11 +49,12 @@ public class ContaService {
         return contaRepository.findAll();
     }
 
+    //DEPOSITAR
     public void depositar(UUID contaId, BigDecimal valor){
         Conta conta = contaRepository.findById(contaId).orElseThrow(() -> new RuntimeException("Conta não encontrada"));
 
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("O valor do depósito deve ser maior que zero");
+            throw new IllegalArgumentException("O valor do depósito deve ser maior que zero reais");
         }
 
         BigDecimal novoSaldo = conta.getSaldo().add(valor);
@@ -67,4 +68,32 @@ public class ContaService {
         transacao.setConta(conta);
         transacaoRepository.save(transacao);
     }
+
+    //SACAR
+    public void saque(UUID contaId, BigDecimal valor){
+        Conta conta = contaRepository.findById(contaId).orElseThrow(() -> new RuntimeException("Conta não encontrada"));
+
+        if (valor.compareTo(BigDecimal.ZERO) < 0){
+            throw new IllegalArgumentException("O valor do saque deve ser superior a zero reais");
+        }
+
+        BigDecimal saldoAtual= conta.getSaldo();
+
+        if(saldoAtual.compareTo(valor) < 0){
+            throw new IllegalArgumentException("Saldo Insuficiente para realizar o saque");
+        }
+
+        BigDecimal novoSaldo  = saldoAtual.subtract(valor);
+        conta.setSaldo(novoSaldo);
+        contaRepository.save(conta);
+
+
+        Transacao transacao = new Transacao();
+        transacao.setData(LocalDateTime.now());
+        transacao.setQuantidade(valor.negate());
+        transacao.setTipo(TipoTransacao.SAQUE);
+        transacao.setConta(conta);
+        transacaoRepository.save(transacao);
+    }
+
 }
