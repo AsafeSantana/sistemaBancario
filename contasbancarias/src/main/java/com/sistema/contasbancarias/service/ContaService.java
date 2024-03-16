@@ -44,9 +44,18 @@ public class ContaService {
         return contaRepository.save(conta);
     }
 
-    //obter contas
+    //obter contas - ADM
     public List<Conta> getAllContas() {
         return contaRepository.findAll();
+    }
+
+    //encerramento de conta- ADM
+    public void encerrarConta(UUID contaId) {
+        Conta conta = contaRepository.findById(contaId).orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
+        if (conta.getSaldo().compareTo(BigDecimal.ZERO) != 0){
+            throw new IllegalArgumentException("A conta não pode ser encerrada,pois ainda tem saldo");
+        }
+        contaRepository.delete(conta);
     }
 
     //DEPOSITAR
@@ -95,5 +104,6 @@ public class ContaService {
         transacao.setConta(conta);
         transacaoRepository.save(transacao);
     }
+
 
 }
