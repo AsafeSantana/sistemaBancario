@@ -78,4 +78,17 @@ public class ContaController {
         }
     }
 
+    //TRANSFERENCIA
+    @PostMapping("/{contaOrigemId}/transferir/{contaDestinoId}")
+    public  ResponseEntity<String> transferir(@PathVariable UUID contaOrigemId, @PathVariable UUID contaDestinoId, @RequestParam BigDecimal valor){
+    try {
+        contaService.transferencia(contaOrigemId,contaDestinoId, valor);
+        return ResponseEntity.ok("Transferência realizada com sucesso");
+    }catch (IllegalArgumentException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }catch(RuntimeException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+    }
+
 }

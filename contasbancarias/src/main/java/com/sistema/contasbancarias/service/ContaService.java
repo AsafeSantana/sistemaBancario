@@ -7,6 +7,7 @@ import com.sistema.contasbancarias.repository.ContaRepository;
 import com.sistema.contasbancarias.repository.TransacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -105,5 +106,39 @@ public class ContaService {
         transacaoRepository.save(transacao);
     }
 
+    //TRANSFERENCIA
+    @Transactional
+    public  void transferencia(UUID contaOrigemId, UUID contaDestinoId, BigDecimal valor){
+       Conta contaOrigem = contaRepository.findById(contaOrigemId).orElseThrow(() -> new IllegalArgumentException("Conta origem não encontrada"));
+       Conta contaDestino = contaRepository.findById(contaDestinoId).orElseThrow(() -> new IllegalArgumentException("Conta destino não encontrada"));
+
+       if (valor.compareTo(BigDecimal.ZERO) <= 0 ){
+           throw new IllegalArgumentException("O valor da transferência deve ser maior que zero");
+       }
+        if (contaOrigem.getSaldo().compareTo(valor) < 0){
+            throw new RuntimeException("Saldo Insuficiente para efetuar a transferência!");
+        }
+
+        contaOrigem.debitar(valor);
+        contaDestino.creditar(valor);
+
+        contaRepository.save(contaOrigem);
+        contaRepository.save(contaDestino);
+
+
+        registrarTransacao(contaOrigem, TipoTransacao.TRANSFERENCIA, valor);
+        registrarTransacao(contaDestino, TipoTransacao.TRANSFERENCIA,valor);
+
+
+    }
+    //registrar transação transferencia
+    private void registrarTransacao(Conta conta, TipoTransacao tipoTransacao, BigDecimal valor) {
+        Transacao transacao = new Transacao();
+        transacao.setConta(conta);
+        transacao.setData(LocalDateTime.now());
+        transacao.setTipo(tipoTransacao);
+        transacao.setQuantidade(valor);
+        transacaoRepository.save(transacao);
+    }
 
 }

@@ -28,6 +28,14 @@ public class Conta {
 
     private String agencia;
 
+    public void debitar(BigDecimal valor){
+        this.saldo = this.saldo.subtract(valor);
+    }
+
+    public void creditar(BigDecimal valor){
+        this.saldo = this.saldo.add(valor);
+    }
+
     @OneToMany(mappedBy = "conta",cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Transacao> transacoes = new ArrayList<>();
